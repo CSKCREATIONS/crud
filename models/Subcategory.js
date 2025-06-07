@@ -1,0 +1,38 @@
+const moongose = require('mongoose');
+const category = require('./category');
+const { default: mongoose } = require('mongoose');
+
+const subcategorySchema = new moongose.Schema({
+    name:{
+        type: String,
+        require:[true,'El nombre es obligatorio'],
+        trim:true,
+        unique: true,
+    },
+    description:{
+        type:String,
+        require:[true,'La descripicion es obligatoria'],
+        trim: true,
+        
+    },
+    category:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'Category',
+        required:[true, 'La catregoria es requerida']
+    }
+},{
+    timestamps: true,
+    versionKey:false
+});
+
+//Manejo de errores de duplicados
+subcategorySchema.post('save', function(error, doc,next){
+    if(error.name === 'MongoServerErrorr' && error.code === 11000){
+        next(new Error('Ya existe una subcategoria con ese nombre'));
+
+    } else{
+        next(error);
+    }
+});
+
+module.exports = mongoose.model('Subcategory', subcategorySchema);
