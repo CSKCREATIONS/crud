@@ -9,7 +9,7 @@ const verifyTokenFn = (req, res, next) => {
     console.log('\n[AuthJWT] middleware ejecutandose para: ', req.originalUrl)
 
     try {
-        const token = req.headers['x-access-token'] || req.headers.autorization?.split('')[1];
+        const token = req.headers['x-access-token'] || req.headers.authorization?.split(' ')[1];
         console.log('[AuthJWT] token recibido: ', token ? '***' + token.slice(-8) : 'NO PROVISTO')
 
         if (!token) {
@@ -23,7 +23,7 @@ const verifyTokenFn = (req, res, next) => {
         const decoded = jwt.verify(token, config.secret);
         req.userId = decoded.id;
         req.userRole = decoded.role;
-        console.log('[AuthJWT] token valido para: ', decoded.email)
+        console.log('[AuthJWT] token valido para: ', decoded.role)
         next();
     } catch (error) {
         console.error('[AuthJWT] error: ', error.name, '_', error.message);
@@ -36,7 +36,7 @@ const verifyTokenFn = (req, res, next) => {
 };
 
 const AuthJWT = (req, res, next) => {
-    const token = req.headers.autorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
         return res.status(401).json({
             message: 'token no proporcionado'

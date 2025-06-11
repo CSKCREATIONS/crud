@@ -3,7 +3,7 @@ const User = require('../models/User')
 
 exports.authenticate = async (res, req, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer', '')
+        const token = req.header('authorization')?.replace('Bearer', '')
 
         if (!token) {
             return res.status(401).json({
