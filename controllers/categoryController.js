@@ -36,7 +36,7 @@ exports.createCategory = async (req,res) =>{
 
         await newCategory.save();
 
-        res.status(201)({
+        res.status(201).json({
             success:true,
             message:'categoria creada exitosamente',
             data:newCategory
@@ -103,7 +103,7 @@ exports.getCategoriesById = async (req,res) =>{
     }
 };
 
-exports.updateCategory = async (res, req) =>{
+exports.updateCategory = async (req, res) =>{
     try{
         const{name, description} = req.body;
         const updateData = {};
@@ -126,12 +126,12 @@ exports.updateCategory = async (res, req) =>{
         updateData.description = description.trim();
 
         }
-        const updatedCategory = await Category.findIdUpdate(
+        const updateCategory = await Category.findByIdAndUpdate(
             req.params.id,
             updateData,
-            {new:true, runValidators}
+            {new:true, runValidators: true}
         );
-        if(!updatedCategory){
+        if(!updateCategory){
             return res.status(404).json({
                 success:false,
                 message:'Categoria no encontrada'
@@ -140,7 +140,7 @@ exports.updateCategory = async (res, req) =>{
         res.status(200).json({
             success:true,
             message:'Categoria actualizada',
-            data:updatedCategory
+            data:updateCategory
         });
     
     }catch(error){
@@ -153,7 +153,7 @@ exports.updateCategory = async (res, req) =>{
     
 };
 
-exports.deleteCategory = async (res,req) =>{
+exports.deleteCategory = async (req, res) =>{
     try{
         const deleteCategory = await Category.findByIdAndDelete(req.params.id);
         if(!deleteCategory){

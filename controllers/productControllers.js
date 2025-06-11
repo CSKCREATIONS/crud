@@ -96,7 +96,7 @@ exports.getProducts = async (req,res) =>{
 
         res.status(200).json({
             success:true,
-            const: product.lenght,
+            const: products.lenght,
             data:products
         })
     }catch (error){
@@ -109,7 +109,7 @@ exports.getProducts = async (req,res) =>{
     }
 };
 
-exports.getProductById = async (res,req) =>{
+exports.getProductById = async (req, res) =>{
     try{
         const product = await Product.findById(req.params.id)
         .populate('category','name description')
@@ -136,101 +136,102 @@ exports.getProductById = async (res,req) =>{
     }
 };
 
-exports.updateProduct = async (req,res) =>{
-    try{
-        const {name, description, price,stock,category,subcategory} = req.body;
+exports.updateProduct = async (req, res) => {
+    try {
+        const { name, description, price, stock, category, subcategory } = req.body;
         const updateData = {};
 
-        //Validar y preparar datos para actualizacion
-        if(name) updateData.name= name;
-        if(description) updateData.description = description;
-        if(price) updateData.price = price;
-        if(stock) updateData.stock = stock;
+        // Validar y preparar datos para actualización
+        if (name) updateData.name = name;
+        if (description) updateData.description = description;
+        if (price) updateData.price = price;
+        if (stock) updateData.stock = stock;
 
-        //validar relaciones si se actualizan
-        if(category || subcategory){
-            if(category){
+        // Validar relaciones si se actualizan
+        if (category || subcategory) {
+            if (category) {
                 const categoryExist = await Category.findById(category);
-                if(!categoryExist){
+                if (!categoryExist) {
                     return res.status(404).json({
-                        success:false,
-                        message:'la categoria especifica no existe'
+                        success: false,
+                        message: 'La categoría especificada no existe'
                     });
                 }
                 updateData.category = category;
             }
-            if(subcategory){
+
+            if (subcategory) {
                 const subcategoryExists = await Subcategory.findOne({
-                    _id:subcategory,
-                    category:category || updateData.category
+                    _id: subcategory,
+                    category: category || updateData.category
                 });
 
-                if(!subcategoryExists){
+                if (!subcategoryExists) {
                     return res.status(400).json({
-                        success:false,
-                        message:'esta subcategoria no existe o no pertenece a la categoria '
+                        success: false,
+                        message: 'Esta subcategoría no existe o no pertenece a la categoría'
                     });
                 }
                 updateData.subcategory = subcategory;
-                
             }
-         }
-        //actualizar el producto
-        const updatedProduct = await Product.findByAndUpdate(
-            req.params.id,
-            updateData,{
-                new:true,
-                runValidatos: true
+        }
 
+        // Actualizar el producto
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            {
+                new: true,
+                runValidators: true
             }
         )
         .populate('category', 'name')
-        .populate('subcatgory','name');
-        
-        if(!this.updatedProduct){
+        .populate('subcategory', 'name');
+
+        if (!updatedProduct) {
             return res.status(404).json({
-                success:false,
-                message:'Producto no encontrado'
+                success: false,
+                message: 'Producto no encontrado'
             });
         }
 
         res.status(200).json({
-            success:true,
-            message:'Producto actualizado exitosomente',
+            success: true,
+            message: 'Producto actualizado exitosamente',
             data: updatedProduct
         });
-    } catch(error){
-        console.error('Error en updateProduct',error);
+
+    } catch (error) {
+        console.error('Error en updateProduct', error);
         res.status(500).json({
-            success:false,
-            message:'Error en actualizar el producto'
+            success: false,
+            message: 'Error al actualizar el producto'
         });
     }
 };
 
-exports.deleteProduct = async (req,res) =>{
-    try{
-        const product = await Product.findByAndDelete(req.params.id);
 
-        if(!product){
+exports.deleteProduct = async (req, res) => {
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+
+        if (!product) {
             return res.status(404).json({
-                success:false,
-                menssage:'Producto no encontrado'
+                success: false,
+                message: 'Producto no encontrado'
             });
         }
 
         res.status(200).json({
-            success:true,
-            message:'Producto eliminado correctamente',
+            success: true,
+            message: 'Producto eliminado correctamente',
             data: product
         });
-    }catch(error){
-        console.error('Error en deleteProduct',error);
+    } catch (error) {
+        console.error('Error en deleteProduct', error);
         res.status(500).json({
-            success:false,
-            message:'Error al eliminar el producto'
-
+            success: false,
+            message: 'Error al eliminar el producto'
         });
     }
-    
 };

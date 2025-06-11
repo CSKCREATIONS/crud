@@ -2,17 +2,28 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
 //Obtener todos los usuarios (solo admin)
-exports.getAllUsers = async (req, res) =>{
-    console.log('[CONTROLLER] Ejecutando getAllUsers');//Diagnostico
-    try{
-        const users = await user.find().select('password');
-        console.log('[CONTROLLER] Usuarios encontrados:',users.lenght);//Diagnostico
+exports.getAllUsers = async (req, res) => {
+    console.log('[CONTROLLER] Ejecutando getAllUsers'); // Diagnóstico
+
+    try {
+        let users;
+
+        if (req.userRole === 'auxiliar') {
+            // Si el rol es auxiliar, solo ve su propio usuario
+            users = await User.find({ _id: req.userId }).select('-password');
+        } else {
+            // Si es admin o coordinador, puede ver todos los usuarios
+            users = await User.find().select('-password');
+        }
+
+        console.log('[CONTROLLER] Usuarios encontrados:', users.length); // Diagnóstico
+
         res.status(200).json({
-            success:true,
-            data:users
+            success: true,
+            data: users
         });
-    }catch(error){
-        console.error('[CONTROLLER] error en getAllUsers:', error.message);//Diagnostico
+    } catch (error) {
+        console.error('[CONTROLLER] error en getAllUsers:', error.message); // Diagnóstico
         res.status(500).json({
             success: false,
             message: 'Error al obtener usuarios'
@@ -20,9 +31,8 @@ exports.getAllUsers = async (req, res) =>{
     }
 };
 
-
 //Obtener usuario especifico
-exports.getUserById = async (res,req) =>{
+exports.getUserById = async (req,res) =>{
     try{
         const user = await User.findById(req.params.id).select('-password');
 
@@ -34,14 +44,14 @@ exports.getUserById = async (res,req) =>{
         }
 
         //validaciones de acceso
-        if(req.user.role === 'auxiliar' && req.user.id !== user.id.toString()){
+        if(req.userRole === 'auxiliar' && req.userId !== user.id.toString()){
             return res.status(403).json({
                 success:false,
                 message:'No tienes permisos para ver este usuario'
             });
         }
 
-        if(req.user.role === 'coordinador' && user.role === 'admin'){
+        if(req.userRole === 'coordinador' && user.role === 'admin'){
             return res.status(403).json({
                 success:false,
                 message:'NO puedes ver usuarios admin'
@@ -131,7 +141,7 @@ exports.deleteUser = async(req,res) =>{
     try{
         const deletedUser = await User.findByIdAndDelete(req.params.id);
         if(!deletedUser){
-            console.log('[CONTROLLER] usuario no encontrado para eliminar');//Diagnosco
+            console.log('[CONTROLLER] usuario no encontrado para eliminar');//Diagnostico
             return res.status(404).json({
                 success:false,
                 message:'Usuario no encontrado'

@@ -53,27 +53,26 @@ exports.createSubcategory = async (req, res) =>{
 
 //obtener todas las subcategorias
 
-exports.getSubcategories = async(req,res) => 
-    {
-    try{
-        const subcategories = await Subcategory.find(). populate('category','name');
+exports.getSubcategories = async (req, res) => {
+    try {
+        const subcategories = await Subcategory.find().populate('category', 'name');
         res.status(200).json({
-            success:true,
+            success: true,
             data: subcategories
         });
-        
-    }catch(error){
-        console.error('Error al obtener subcategorias:',error);
+    } catch (error) {
+        console.error('Error al obtener subcategorías:', error);
         res.status(500).json({
-            success:false,
-            message:'Error al obtener subcategorias'
+            success: false,
+            message: 'Error al obtener subcategorías'
         });
     }
 };
 
+
 //Obtener subcategoria por id
 
-exports.getSubcategoryById = async (req,res) =>{
+exports.getSubcategoryById = async (req, res) =>{
     try{
         const subcategory = await Subcategory.findById(req.params.id).populate('category','name');
 
@@ -117,8 +116,7 @@ exports.updateSubcategory= async (req,res) =>{
         const updateSubcategory = await Subcategory.findByIdAndUpdate(req.params.id,
         {
             name: name? name.trim(): undefined,
-            description: description ? description.
-            trim(): undefined,
+            description: description ? description.trim(): undefined,
             category
         },{new: true, runValidators:true}
     );

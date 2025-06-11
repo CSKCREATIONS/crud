@@ -42,6 +42,7 @@ exports.signup = async (req, res) => {
     const token = jwt.sign(
       { 
         id: savedUser._id,
+        email:savedUser.email,
         role: savedUser.role 
       },
       config.secret,
