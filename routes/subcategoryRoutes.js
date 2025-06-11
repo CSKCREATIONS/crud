@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const subcategoryController = require('../controllers/subcategoryController');
 const{check} = require('express-validator');
+const { authJwt, role } = require('../middlewares');
 
 //validaciones
 const validateSubcategory = [
@@ -11,10 +12,10 @@ const validateSubcategory = [
 ];
 
 //rutas
-router.post('/', validateSubcategory,subcategoryController.createSubcategory);
+router.post('/', [authJwt.verifyToken, role.checkRole('admin','coordinador')],validateSubcategory,subcategoryController.createSubcategory);
 router.get('/', subcategoryController.getSubcategories);
 router.get('/:id', subcategoryController.getSubcategoryById);
-router.put('/:id', validateSubcategory,subcategoryController.updateSubcategory);
-router.put('/:id',subcategoryController.deleteSubcategory);
+router.put('/:id',[authJwt.verifyToken, role.checkRole('admin','coordinador')], validateSubcategory,subcategoryController.updateSubcategory);
+router.delete('/:id',[authJwt.verifyToken, role.checkRole('admin')],subcategoryController.deleteSubcategory);
 
 module.exports = router;
